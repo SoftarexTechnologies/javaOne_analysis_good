@@ -2,6 +2,11 @@ package com.dcservice.web.pages;
 
 import static com.dcservice.common.helpers.ValidationHelper.isNullOrEmpty;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -48,6 +53,19 @@ public class FieldEditBean extends BaseEditBean implements Serializable {
 
 	private Long optionGeneratedId;
 
+	private void readObject(ObjectInputStream ois)
+			throws ClassNotFoundException, IOException {
+		ois.defaultReadObject();
+	}
+
+	private void writeObject(ObjectOutputStream oos) throws IOException {
+		oos.defaultWriteObject();
+	}
+
+	private void readObjectNoData() throws ObjectStreamException {
+		throw new InvalidObjectException("Stream data required");
+	}
+	
 	@Override
 	protected void onConstruct() {
 		initField();

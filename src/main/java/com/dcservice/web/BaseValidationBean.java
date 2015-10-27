@@ -10,7 +10,6 @@ import java.util.List;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlForm;
 
-import com.dcservice.common.exceptions.PersistenceBeanException;
 import com.dcservice.common.helpers.ResourcesHelper;
 import com.dcservice.common.helpers.ValidatorHelper;
 import com.ocpsoft.shade.org.apache.commons.logging.Log;
@@ -73,18 +72,18 @@ public abstract class BaseValidationBean extends BasePageBean {
 	}
 
 	private String completeId(UIComponent component) {
-		String sb = new String();
+		StringBuilder sb = new StringBuilder();
 		UIComponent parent = component.getParent();
 		while (parent != null) {
 			if (parent.getClass().equals(HtmlForm.class)
 					|| UIComponent.isCompositeComponent(parent)) {
-				sb = sb + String.format("%s:", parent.getId());
+				sb.append(String.format("%s:", parent.getId()));
 			}
 
 			parent = parent.getParent();
 		}
-		sb = sb + component.getId();
-		return sb;
+		sb.append(component.getId());
+		return sb.toString();
 	}
 
 	public void cleanValidation() {

@@ -1,5 +1,6 @@
 package com.dcservice.persistence.dao;
 
+import java.io.IOException;
 import java.util.Date;
 
 import javax.faces.context.FacesContext;
@@ -50,7 +51,7 @@ public class DaoManager {
 			} else {
 				getSession().saveOrUpdate(object);
 			}
-		} catch (Exception e) {
+		} catch (IllegalAccessException | PersistenceBeanException e) {
 			log.error(e.getMessage(), e);
 			if (beginTransaction) {
 				if (tr != null && tr.getStatus() == TransactionStatus.ACTIVE) {
@@ -61,7 +62,7 @@ public class DaoManager {
 							getSession().close();
 						}
 
-					} catch (Exception ex) {
+					} catch (IllegalAccessException | PersistenceBeanException ex) {
 						log.error(ex.getMessage(), ex);
 					}
 				}
@@ -98,7 +99,7 @@ public class DaoManager {
 
 			getSession().delete(object);
 
-		} catch (Exception e) {
+		} catch (IllegalAccessException | PersistenceBeanException e) {
 			log.error(e);
 			if (beginTransaction) {
 				if (tr != null && tr.getStatus() == TransactionStatus.ACTIVE) {

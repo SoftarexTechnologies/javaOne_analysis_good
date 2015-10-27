@@ -6,6 +6,7 @@ import java.util.List;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
+import com.dcservice.common.exceptions.PersistenceBeanException;
 import com.dcservice.persistence.dao.DaoManager;
 import com.dcservice.persistence.models.QFieldResponse;
 import com.dcservice.persistence.models.fields.Field;
@@ -49,7 +50,7 @@ public class ResponsesListBean extends BasePageBean {
 				responses.add(new ResponseWrapper(item));
 			});
 
-		} catch (Exception e) {
+		} catch (IllegalAccessException | PersistenceBeanException e) {
 			log.error(e.getMessage(), e);
 		}
 	}

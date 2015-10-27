@@ -50,10 +50,8 @@ public class ListHelper extends BaseHelper {
 
 	public static void printWithStep(List<String> list, int step) {
 		if (!isNullOrEmpty(list) && step > 0) {
-			int position = 0;
-			while (list.size() > position) {
-				System.out.println(list.get(position));
-				position = position + step;
+			for(int i = 0; i < list.size(); i = i + step) {
+				System.out.println(list.get(i));
 			}
 		}
 	}

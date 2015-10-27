@@ -12,22 +12,14 @@ public class RedirectHelper  extends BaseHelper  {
 	public static final String ID_PARAMETER = "id";
 
 	public static void goTo(PagesTypes type) {
-		try {
-			if (type != null) {
-				sendRedirect(getLink(type));
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+		if (type != null) {
+			sendRedirect(getLink(type));
 		}
 	}
 
 	public static void goTo(PagesTypes type, Long id) {
-		try {
-			if (type != null) {
-				sendRedirect(getLink(type).concat(id.toString()));
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+		if (type != null) {
+			sendRedirect(getLink(type).concat(id.toString()));
 		}
 	}
 
@@ -38,14 +30,14 @@ public class RedirectHelper  extends BaseHelper  {
 	public static void sendRedirect(String url) {
 		HttpServletRequest request = (HttpServletRequest) FacesContext
 				.getCurrentInstance().getExternalContext().getRequest();
-		String sb = new String("");
-		sb = sb + (getServerURL()) + request.getContextPath();
+		StringBuilder sb = new StringBuilder("");
+		sb.append(getServerURL()).append(request.getContextPath());
 		if (!url.startsWith("/")) {
-			sb = sb + "/";
+			sb.append("/");
 		}
-		sb = sb + url;
+		sb.append(url);
 		try {
-			FacesContext.getCurrentInstance().getExternalContext().redirect(sb);
+			FacesContext.getCurrentInstance().getExternalContext().redirect(sb.toString());
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
 		}

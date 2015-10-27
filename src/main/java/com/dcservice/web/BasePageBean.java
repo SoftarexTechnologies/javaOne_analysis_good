@@ -1,6 +1,13 @@
 package com.dcservice.web;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.util.Date;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
@@ -10,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.primefaces.context.RequestContext;
 
+import com.dcservice.persistence.models.FieldResponse;
 import com.ocpsoft.shade.org.apache.commons.logging.Log;
 import com.ocpsoft.shade.org.apache.commons.logging.LogFactory;
 
@@ -23,6 +31,19 @@ public abstract class BasePageBean implements Serializable {
 		onConstruct();
 	}
 
+	private void readObject(ObjectInputStream ois)
+			throws ClassNotFoundException, IOException {
+		ois.defaultReadObject();
+	}
+
+	private void writeObject(ObjectOutputStream oos) throws IOException {
+		oos.defaultWriteObject();
+	}
+
+	private void readObjectNoData() throws ObjectStreamException {
+		throw new InvalidObjectException("Stream data required");
+	}
+	
 	protected abstract void onConstruct();
 
 	protected boolean isPageBean() {

@@ -2,6 +2,11 @@ package com.dcservice.web.pages;
 
 import static com.dcservice.common.helpers.ValidationHelper.isNullOrEmpty;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +37,19 @@ public class TestBean extends BaseEditBean implements Serializable {
 
 	public boolean dataSubmited;
 
+	private void readObject(ObjectInputStream ois)
+			throws ClassNotFoundException, IOException {
+		ois.defaultReadObject();
+	}
+
+	private void writeObject(ObjectOutputStream oos) throws IOException {
+		oos.defaultWriteObject();
+	}
+
+	private void readObjectNoData() throws ObjectStreamException {
+		throw new InvalidObjectException("Stream data required");
+	}
+	
 	@Override
 	protected void onConstruct() {
 			List<Field> fields = new ArrayList<Field>(0);

@@ -6,9 +6,13 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import com.dcservice.common.exceptions.PersistenceBeanException;
 import com.dcservice.persistence.dao.DaoManager;
+import com.ocpsoft.shade.org.apache.commons.logging.Log;
+import com.ocpsoft.shade.org.apache.commons.logging.LogFactory;
 
 public class TransactionExecuter  {
 	private static Object monitor = new Object();
+	
+	public static final Log log = LogFactory.getLog(TransactionExecuter.class);
 
 	public static void execute(IAction action) throws IllegalAccessException, PersistenceBeanException {
 		execute(action, DaoManager.getSession());
@@ -21,19 +25,16 @@ public class TransactionExecuter  {
 				tr = session.beginTransaction();
 
 				action.execute(session);
-			} catch (Exception e) {
 				if (tr != null && tr.getStatus() == TransactionStatus.ACTIVE) {
 					tr.rollback();
 				}
-
-				action.onException(e);
 			} finally {
 				if (tr != null && tr.getStatus() == TransactionStatus.ACTIVE
 						&& tr.getStatus() != TransactionStatus.ROLLED_BACK) {
 					try {
 						tr.commit();
 					} catch (Exception e) {
-						action.onException(e);
+						log.error(e.getMessage(), e);
 					}
 				}
 				action.onExecuted();

@@ -4,7 +4,7 @@ import static com.dcservice.common.helpers.ValidationHelper.isNullOrEmpty;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,11 +69,11 @@ public class PersistenceSession {
 	public static Session createSession() throws PersistenceBeanException {
 		Session session = null;
 		try {
-			session = HibernateUtil.getSessionFactory().openSession();
+			session = HibernateUtil.getInstance().getSessionFactory().openSession();
 			SessionTracker.getInstance().sessionOpening("PersistenceSession");
 			session.setFlushMode(FlushMode.COMMIT);
 			session.setCacheMode(CacheMode.IGNORE);
-		} catch (Throwable ex) {
+		} catch (ExceptionInInitializerError ex) {
 			throw new PersistenceBeanException(
 					"Error of Hibernate Session creating...", ex);
 		}
@@ -86,7 +86,7 @@ public class PersistenceSession {
 		Session session = null;
 		try {
 			Configuration config = new Configuration();
-			HibernateUtil.addAnnotatedClasses(config);
+			HibernateUtil.getInstance().addAnnotatedClasses(config);
 			config.configure();
 
 			Map<String, String> params = new HashMap<String, String>();
@@ -126,7 +126,7 @@ public class PersistenceSession {
 			SessionFactory sessionFactory = config.buildSessionFactory();
 			session = sessionFactory.openSession();
 			session.setFlushMode(FlushMode.COMMIT);
-		} catch (Throwable ex) {
+		} catch (ExceptionInInitializerError ex) {
 			log.info("createSession(). exception : " + ex);
 			throw new PersistenceBeanException(
 					"Error of Hibernate Session creating...", ex);
@@ -137,23 +137,23 @@ public class PersistenceSession {
 
 	public static Configuration getConfiguration(Logger outLog) {
 		Configuration cfg = null;
-		InputStream is;
-		try {
+		try(InputStream is = new FileInputStream(new File("./hibernate.cfg.xml"))) {
 			outLog.info("Trying to read Hibernate cfg from current dir...");
-			is = new FileInputStream(new File("./hibernate.cfg.xml"));
 			cfg = new Configuration().addInputStream(is).configure();
-
 			outLog.info("Hibernate cfg has been read from current dir...");
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			outLog.info("Trying to read Hibernate cfg by current ClassLoader...");
-			is = PersistenceSession.class
-					.getResourceAsStream("/hibernate.cfg.xml");
-			if (is != null) {
-				cfg = new Configuration().addInputStream(is).configure();
-
-				outLog.info("Hibernate cfg has been read by current ClassLoader...");
+			try(InputStream is2 = PersistenceSession.class
+					.getResourceAsStream("/hibernate.cfg.xml")){
+				if (is2 != null) {
+					cfg = new Configuration().addInputStream(is2).configure();
+	
+					outLog.info("Hibernate cfg has been read by current ClassLoader...");
+				}
+			}catch (IOException e2) {
+				outLog.error(e2.getMessage(), e2);
 			}
-		}
+		} 
 		if (cfg == null) {
 			cfg = new Configuration().configure();
 		}
@@ -162,15 +162,8 @@ public class PersistenceSession {
 
 	public void closeSession() {
 		if (session != null) {
-			try {
-				session.clear();
-				session.close();
-			} catch (Exception e) {
-				session.cancelQuery();
-				session.clear();
-				session.close();
-				log.error(e.getMessage(), e);
-			}
+			session.clear();
+			session.close();
 			SessionTracker.getInstance().sessionClosing("PersistenceSession");
 			session = null;
 		}

@@ -40,7 +40,7 @@ public class ValidationHelper  extends BaseHelper  {
 	}
 
 	public static boolean isNullOrEmpty(Double str) {
-		return str == null || str == 0.0;
+		return str == null || str.equals(0d);
 	}
 
 	public static boolean isNullOrEmpty(BaseModel obj) {

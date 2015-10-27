@@ -15,12 +15,8 @@ public class ApplicationListener implements ServletContextListener, IConnectionL
 
 	@Override
 	public void contextInitialized(ServletContextEvent arg0) {
-		HibernateUtil.addConnectionListener(this);
-        try {
-			HibernateUtil.getSessionFactory();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		HibernateUtil.getInstance().addConnectionListener(this);
+		HibernateUtil.getInstance().getSessionFactory();
 	}
 
 	@Override

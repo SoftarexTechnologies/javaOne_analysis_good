@@ -7,6 +7,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
 import com.dcservice.common.enums.PagesTypes;
+import com.dcservice.common.exceptions.PersistenceBeanException;
 import com.dcservice.common.helpers.ListHelper;
 import com.dcservice.common.helpers.RedirectHelper;
 import com.dcservice.persistence.dao.DaoManager;
@@ -24,12 +25,12 @@ public class FieldListBean extends BasePageBean implements Serializable {
 
 	@Override
 	protected void onConstruct() {
-		try {
-			fields = DaoManager.query().from(QField.field).fetchAll()
-					.list(QField.field);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
+			try {
+				fields = DaoManager.query().from(QField.field).fetchAll()
+						.list(QField.field);
+			} catch (IllegalAccessException | PersistenceBeanException e) {
+				log.error(e.getMessage(), e);
+			}
 	}
 
 	public void add() {

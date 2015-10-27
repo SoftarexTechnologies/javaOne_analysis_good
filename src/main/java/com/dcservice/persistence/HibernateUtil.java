@@ -29,9 +29,16 @@ public class HibernateUtil implements IConnectionManager {
 
 	private static ServiceRegistry serviceRegistry;
 
-	private static List<IConnectionListner> connectionListners = new ArrayList<IConnectionListner>();
+	private static List<IConnectionListner> connectionListners;
 
-	public static void addAnnotatedClasses(Configuration config) {
+	public static Map<String, String> connectionSettings;
+	
+	public HibernateUtil(){
+		connectionListners = new ArrayList<IConnectionListner>();
+		connectionSettings = new HashMap<String, String>();
+	}
+	
+	public void addAnnotatedClasses(Configuration config) {
 		config.addAnnotatedClass(Field.class);
 		config.addAnnotatedClass(Option.class);
 		config.addAnnotatedClass(Response.class);
@@ -39,22 +46,22 @@ public class HibernateUtil implements IConnectionManager {
 
 	}
 
-	public static List<String> getViewClasses() {
+	public List<String> getViewClasses() {
 		List<String> viewClasses = new ArrayList<String>();
 
 		return viewClasses;
 	}
 
-	public static void addConnectionListener(IConnectionListner listener) {
+	public void addConnectionListener(IConnectionListner listener) {
 		connectionListners.add(listener);
 	}
 
-	public static void removeConnectionListener(IConnectionListner listener) {
+	public void removeConnectionListener(IConnectionListner listener) {
 		connectionListners.remove(listener);
 	}
 
-	public static synchronized SessionFactory getSessionFactory()
-			throws ExceptionInInitializerError, Exception {
+	public synchronized SessionFactory getSessionFactory()
+			throws ExceptionInInitializerError {
 		if (sessionFactory == null) {
 			createSessionFactory();
 		}
@@ -70,15 +77,12 @@ public class HibernateUtil implements IConnectionManager {
 		return instance;
 	}
 
-	public static Map<String, String> connectionSettings = new HashMap<String, String>();
-
 	private static void createSessionFactory()
 			throws ExceptionInInitializerError {
-		try {
 			Date d1 = new Date();
 			System.out.println("HibernateUtil: Opening DB connection.");
 			Configuration config = new Configuration();
-			HibernateUtil.addAnnotatedClasses(config);
+			HibernateUtil.getInstance().addAnnotatedClasses(config);
 			config.configure();
 
 			Map<String, String> params = new HashMap<String, String>();
@@ -118,22 +122,12 @@ public class HibernateUtil implements IConnectionManager {
 			sessionFactory = config.buildSessionFactory(serviceRegistry);
 
 			checkConnection(d1);
-		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
-			onConnectionFail();
-			System.err.println("Failed to create sessionFactory object." + ex);
 
-			throw new ExceptionInInitializerError(ex);
-		}
 	}
 
 	public static void checkConnection() {
 		Session s = null;
-		try {
-			s = sessionFactory.openSession();
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
+		s = sessionFactory.openSession();
 		s.beginTransaction().commit();
 		SessionTracker.getInstance().sessionOpening("HibernateUtil");
 		s.close();
@@ -143,15 +137,7 @@ public class HibernateUtil implements IConnectionManager {
 	}
 
 	private static void checkConnection(Date d1) {
-		try {
-			checkConnection();
-		} catch (Exception e) {
-			System.out.println("Opening a DB connection... Failed");
-			log.error(e.getMessage(), e);
-			onConnectionFail();
-			return;
-		}
-
+		checkConnection();
 		System.out.println(String.format(
 				"Connection was successfully opened in %d seconds",
 				(new Date().getTime() - d1.getTime()) / 1000));
@@ -191,7 +177,7 @@ public class HibernateUtil implements IConnectionManager {
 		HibernateUtil.shutdown();
 		try {
 			createSessionFactory();
-		} catch (Exception e) {
+		} catch (ExceptionInInitializerError e) {
 			log.error(e.getMessage(), e);
 		}
 		System.out.println("SessionFactory recreated");
